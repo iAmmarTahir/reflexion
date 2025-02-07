@@ -1,0 +1,11 @@
+python main.py \
+  --run_name "bigcodebench-valtest-regenerated-gpt-o3-mini-5-iters" \
+  --root_dir "root" \
+  --dataset_path ./benchmarks/valtest-regenerated/bigcodebench.jsonl \
+  --strategy "reflexion" \
+  --language "py" \
+  --model "gpt-o3-mini" \
+  --pass_at_k "1" \
+  --max_iters "5" \
+  --is_unit_test \
+  --verbose

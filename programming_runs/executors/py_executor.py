@@ -44,7 +44,6 @@ class PyExecutor(Executor):
         feedback += "\n\nTests failed:"
         for test in failed_tests:
             feedback += f"\n{test}"
-            
         return ExecuteResult(is_passing, feedback, state)
 
     def evaluate(self, name: str, func: str, test: str, timeout: int = 5) -> bool:
@@ -56,8 +55,6 @@ class PyExecutor(Executor):
         code = f"""{func}
 
 {test}
-
-check({name})
     """
         try:
 

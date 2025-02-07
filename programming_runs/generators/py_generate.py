@@ -12,10 +12,10 @@ PY_REFLEXION_COMPLETION_INSTRUCTION = "You are a Python writing assistant. You w
 PY_SELF_REFLECTION_COMPLETION_INSTRUCTION = "You are a Python writing assistant. You will be given a function implementation and a series of unit tests. Your goal is to write a few sentences to explain why your implementation is wrong as indicated by the tests. You will need this as a hint when you try again later. Only provide the few sentence description in your answer, not the implementation.\n\n-----"
 USE_PYTHON_CODEBLOCK_INSTRUCTION = "Use a Python code block to write your response. For example:\n```python\nprint('Hello world!')\n```"
 
-PY_SIMPLE_CHAT_INSTRUCTION = "You are an AI that only responds with python code, NOT ENGLISH. You will be given a function signature and its docstring by the user. Write your full implementation (restate the function signature)."
+PY_SIMPLE_CHAT_INSTRUCTION = "You are an AI that only responds with python code, NOT ENGLISH. You will be given a function signature and its docstring by the user. Write your full implementation and MAKE SURE TO INCLUDE ALL REQUIRED LIBRARIES (restate the function signature)."
 PY_SIMPLE_CHAT_INSTRUCTION_V2 = "You are an AI that only responds with only python code. You will be given a function signature and its docstring by the user. Write your full implementation (restate the function signature)."
 PY_REFLEXION_CHAT_INSTRUCTION = "You are an AI Python assistant. You will be given your past function implementation, a series of unit tests, and a hint to change the implementation appropriately. Write your full implementation (restate the function signature)."
-PY_REFLEXION_CHAT_INSTRUCTION_V2 = "You are an AI Python assistant. You will be given your previous implementation of a function, a series of unit tests results, and your self-reflection on your previous implementation. Write your full implementation (restate the function signature)."
+PY_REFLEXION_CHAT_INSTRUCTION_V2 = "You are an AI Python assistant. You will be given your previous implementation of a function, a series of unit tests results using unittest module in Python, and your self-reflection on your previous implementation. Write your full implementation (restate the function signature)."
 PY_REFLEXION_FEW_SHOT_ADD = '''Example 1:
 [previous impl]:
 ```python
@@ -44,6 +44,231 @@ def add(a: int, b: int) -> int:
     """
     return a + b
 ```
+'''
+
+PY_REFLEXION_FEW_SHOT_UNIT_TEST_CASE = '''Example 1:
+[previous impl]:
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+def task_func():
+    """
+    Draws a seaborn pair plot of the iris dataset using Arial font.
+
+    This function sets the global font to Arial for better readability and visual appeal. 
+    It then generates a pair plot from the iris dataset, where each subplot represents 
+    the relationship between two features, colored by species. The plot includes the 
+    title 'Iris Dataset Pair Plot' and labels for each feature on the axes.
+
+    Returns:
+        plt.Figure: A matplotlib Figure object containing the seaborn pair plot 
+                    of the iris dataset.
+    """
+    # Set the global font family to Arial
+    plt.rcParams["font.family"] = "Arial"
+
+    # Load the iris dataset and create a DataFrame
+    iris_data = load_iris()
+    df = pd.DataFrame(iris_data.data, columns=iris_data.feature_names)
+    df["species"] = pd.Categorical.from_codes(iris_data.target, iris_data.target_names)
+
+    # Create a seaborn pair plot with species as hue
+    grid = sns.pairplot(df, hue="species")
+
+    # Add a title to the figure
+    grid.fig.suptitle("Iris Dataset Pair Plot", fontsize=16)
+    grid.fig.subplots_adjust(top=0.92)  # Adjust the top to make room for the title
+
+    return grid.fig
+```
+
+[unit test results from previous impl]:
+TEST OUTPUT:
+test_number_of_subplots (builtins.TestNumberOfSubplots) ... FAIL
+
+======================================================================
+FAIL: test_number_of_subplots (builtins.TestNumberOfSubplots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<string>", line 45, in test_number_of_subplots
+AssertionError: 20 != 16
+
+----------------------------------------------------------------------
+Ran 1 test in 0.925s
+
+FAILED (failures=1)
+
+FAILED TESTS:
+test_number_of_subplots (builtins.TestNumberOfSubplots)
+
+
+[reflection on previous impl]:
+The issue is that the seaborn pairplot automatically adds an extra legend, which increases the total number of subplot axes from 16 to 20. The unit test expects exactly 16 subplots (a 4×4 grid for the four iris features), but our function returns a figure including the legend, causing the discrepancy.
+
+[improved impl]:
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+
+def task_func():
+    """
+    Draws a seaborn pair plot of the iris dataset using Arial font.
+
+    This function sets the global font to Arial for better readability and visual appeal. 
+    It then generates a pair plot from the iris dataset, where each subplot represents 
+    the relationship between two features, colored by species. The plot includes the 
+    title 'Iris Dataset Pair Plot' and labels for each feature on the axes.
+
+    Returns:
+        plt.Figure: A matplotlib Figure object containing the seaborn pair plot of the 
+                    iris dataset. The figure contains exactly 16 subplot axes 
+                    (a 4x4 grid) with the legend removed.
+    """
+```
+'''
+
+PY_SELF_REFLEXION_FEW_SHOT_UNIT_TEST = '''Example 1:
+[function impl]:
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+
+def task_func():
+    """
+    Draws a seaborn pair plot of the iris dataset using Arial font.
+
+    This function sets the global font to Arial for better readability and visual appeal. 
+    It then generates a pair plot from the iris dataset, where each subplot represents 
+    the relationship between two features, colored by species. The plot includes the 
+    title 'Iris Dataset Pair Plot' and labels for each feature on the axes.
+
+    Returns:
+        plt.Figure: A matplotlib Figure object containing the seaborn pair plot of the 
+                    iris dataset. The figure contains exactly 16 subplot axes 
+                    (a 4x4 grid) with the legend removed.
+    """
+    # Set the global font family to Arial
+    plt.rcParams["font.family"] = "Arial"
+
+    # Load the iris dataset and create a DataFrame
+    iris_data = load_iris()
+    df = pd.DataFrame(iris_data.data, columns=iris_data.feature_names)
+    df["species"] = pd.Categorical.from_codes(iris_data.target, iris_data.target_names)
+
+    # Generate the pair plot with species as hue
+    grid = sns.pairplot(df, hue="species")
+
+    # Remove extra axes (legend or other extras) that are not part of the 4x4 grid.
+    # grid.axes is a 4x4 array of the intended subplot axes.
+    intended_axes = grid.axes.flatten()
+    for ax in grid.fig.axes.copy():
+        if ax not in intended_axes:
+            grid.fig.delaxes(ax)
+
+    # Add a title and adjust the layout for the figure
+    grid.fig.suptitle("Iris Dataset Pair Plot", fontsize=16)
+    grid.fig.subplots_adjust(top=0.92)
+
+    return grid.fig
+```
+[unit test results]:
+TEST OUTPUT:
+test_number_of_subplots (builtins.TestNumberOfSubplots) ... FAIL
+
+======================================================================
+FAIL: test_number_of_subplots (builtins.TestNumberOfSubplots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<string>", line 45, in test_number_of_subplots
+AssertionError: 20 != 16
+
+----------------------------------------------------------------------
+Ran 1 test in 0.925s
+
+FAILED (failures=1)
+
+FAILED TESTS:
+test_number_of_subplots (builtins.TestNumberOfSubplots)
+
+[self-reflection]:
+The issue is that the seaborn pairplot automatically adds an extra legend, which increases the total number of subplot axes from 16 to 20. The unit test expects exactly 16 subplots (a 4×4 grid for the four iris features), but our function returns a figure including the legend, causing the discrepancy.
+
+Example 2:
+[function impl]:
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+
+def task_func():
+    """
+    Draws a seaborn pair plot of the iris dataset using Arial font.
+
+    This function sets the global font to Arial for better readability and visual appeal.
+    It then generates a pair plot from the iris dataset, where each subplot represents 
+    the relationship between two features, colored by species. The plot includes the title 
+    'Iris Dataset Pair Plot' and labels for each feature on the axes.
+
+    Returns:
+        plt.Figure: A matplotlib Figure object containing the seaborn pair plot of the 
+                    iris dataset. The Figure contains exactly 16 subplot axes (a 4×4 grid) 
+                    with the legend removed.
+    """
+    # Set the global font family to Arial
+    plt.rcParams["font.family"] = "Arial"
+
+    # Load the iris dataset and create a DataFrame
+    iris_data = load_iris()
+    df = pd.DataFrame(iris_data.data, columns=iris_data.feature_names)
+    df["species"] = pd.Categorical.from_codes(iris_data.target, iris_data.target_names)
+
+    # Create a seaborn pair plot with species as hue
+    grid = sns.pairplot(df, hue="species")
+
+    # Remove the legend so that the figure contains exactly 16 subplot axes.
+    # The legend is an extra set of axes added to the figure that we want to remove.
+    if hasattr(grid, "_legend") and grid._legend is not None:
+        grid._legend.remove()
+
+    # Add a title and adjust the layout for the figure
+    grid.fig.suptitle("Iris Dataset Pair Plot", fontsize=16)
+    grid.fig.subplots_adjust(top=0.92)
+
+    return grid.fig
+```
+[unit test results]:
+TEST OUTPUT:
+test_number_of_subplots (builtins.TestNumberOfSubplots) ... FAIL
+
+======================================================================
+FAIL: test_number_of_subplots (builtins.TestNumberOfSubplots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<string>", line 54, in test_number_of_subplots
+AssertionError: 20 != 16
+
+----------------------------------------------------------------------
+Ran 1 test in 0.872s
+
+FAILED (failures=1)
+
+FAILED TESTS:
+test_number_of_subplots (builtins.TestNumberOfSubplots)
+
+[self-reflection]:
+The issue is that the seaborn pairplot automatically adds an extra legend, which increases the total number of subplot axes from 16 to 20. The unit test expects exactly 16 subplots (a 4×4 grid for the four iris features), but our function returns a figure including the legend, causing the discrepancy.
+END OF EXAMPLES
 '''
 
 PY_REFLEXION_FEW_SHOT = '''Example 1:
@@ -252,7 +477,7 @@ class PyGenerator(Generator):
             self_reflection_chat_instruction=PY_SELF_REFLECTION_CHAT_INSTRUCTION,
             self_reflection_completion_instruction=PY_SELF_REFLECTION_COMPLETION_INSTRUCTION,
             add_code_block=lambda x: add_code_block(x, "python"),
-            self_reflection_few_shot=PY_SELF_REFLECTION_FEW_SHOT
+            self_reflection_few_shot=PY_SELF_REFLEXION_FEW_SHOT_UNIT_TEST
         )
 
     def func_impl(
@@ -276,7 +501,7 @@ class PyGenerator(Generator):
             num_comps=num_comps,
             temperature=temperature,
             reflexion_chat_instruction=PY_REFLEXION_CHAT_INSTRUCTION,
-            reflexion_few_shot=PY_REFLEXION_FEW_SHOT_ADD,
+            reflexion_few_shot=PY_REFLEXION_FEW_SHOT_UNIT_TEST_CASE,
             simple_chat_instruction=PY_SIMPLE_CHAT_INSTRUCTION,
             reflexion_completion_instruction=PY_REFLEXION_COMPLETION_INSTRUCTION,
             simple_completion_instruction=PY_SIMPLE_COMPLETION_INSTRUCTION,

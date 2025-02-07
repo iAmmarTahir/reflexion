@@ -7,6 +7,7 @@ from tenacity import (
     wait_random_exponential,  # type: ignore
 )
 import openai
+import os
 
 MessageRole = Literal["system", "user", "assistant"]
 
@@ -103,6 +104,32 @@ class GPT4(GPTChat):
     def __init__(self):
         super().__init__("gpt-4")
 
+class GPT4o(GPTChat):
+    def __init__(self):
+        super().__init__("gpt-4o-2024-11-20")
+
+class GPTo3Mini:
+    def __init__(self):
+        self.name = "o3-mini-2025-01-31"
+        self.is_chat = True
+        self.client = openai.OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY"),  # This is the default and can be omitted
+        )
+    def generate_chat(self, messages: List[Message], max_tokens: int = 1024, temperature: float = 0.2, num_comps: int = 1) -> Union[List[str], str]:
+        response = self.client.chat.completions.create(
+            model=self.name,
+            messages=[dataclasses.asdict(message) for message in messages],
+            max_completion_tokens=100000,
+            top_p=1,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            reasoning_effort="high",
+            n=num_comps,
+        )
+        if num_comps == 1:
+            return response.choices[0].message.content  # type: ignore
+
+        return [choice.message.content for choice in response.choices]  # type: ignore
 
 class GPT35(GPTChat):
     def __init__(self):

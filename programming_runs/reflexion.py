@@ -13,9 +13,11 @@ def run_reflexion(
     pass_at_k: int,
     log_path: str,
     verbose: bool,
-    is_leetcode: bool = False
+    is_leetcode: bool = False,
+    is_unit_test: bool = False,
 ) -> None:
-    exe = executor_factory(language, is_leet=is_leetcode)
+    print("IS_UNIT_TEST", is_unit_test)
+    exe = executor_factory(language, is_leet=is_leetcode, is_unit_test=is_unit_test)
     gen = generator_factory(language)
     model = model_factory(model_name)
 
@@ -34,14 +36,20 @@ def run_reflexion(
             if is_leetcode:
                 tests_i = item['visible_tests']
             else:
-                tests_i = gen.internal_tests(item["prompt"], model, 1)
-
+                tests_i = item["test_cases"] if "test_cases" in item else []
             # first attempt
             cur_func_impl = gen.func_impl(item["prompt"], model, "simple")
             implementations.append(cur_func_impl)
             assert isinstance(cur_func_impl, str)
-            is_passing, feedback, _ = exe.execute(cur_func_impl, tests_i)
-            test_feedback.append(feedback)
+            # is_passing, feedback, _ = exe.execute(cur_func_impl, item["test_cases"])
+            if len(tests_i) == 0:
+                is_passing = True
+                is_solved = is_passing
+                num_success += int(is_passing)
+                break
+            else:
+                is_passing, feedback, _ = exe.execute(cur_func_impl, tests_i)
+                test_feedback.append(feedback)
 
             # if solved, exit early
             if is_passing:

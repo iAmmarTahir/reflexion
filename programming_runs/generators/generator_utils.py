@@ -22,6 +22,7 @@ def generic_generate_func_impl(
     parse_code_block: Callable[[str], str],
     add_code_block: Callable[[str], str]
 ) -> Union[str, List[str]]:
+    print("HELLOOOO")
     if strategy != "reflexion" and strategy != "simple":
         raise ValueError(
             f"Invalid strategy: given `{strategy}` but expected one of `reflexion` or `simple`")
@@ -62,7 +63,8 @@ def generic_generate_func_impl(
                 ),
             ]
             func_bodies = model.generate_chat(messages=messages, num_comps=num_comps, temperature=temperature)
-        else:
+        else:  
+            print("HERE")         
             system_prompt = f"{simple_chat_instruction}\n{code_block_instruction}"
             print_messages(system_prompt, func_sig)
             messages = [
@@ -110,6 +112,7 @@ def generic_generate_internal_tests(
         is_react: bool = False
 ) -> List[str]:
     """Generates tests for a function."""
+    print("HELLLOOOO")
     if model.is_chat:
         if is_react:
             messages = [

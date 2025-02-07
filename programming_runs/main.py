@@ -31,6 +31,9 @@ def get_args():
 
     parser.add_argument("--is_leetcode", action='store_true',
                         help="To run the leetcode benchmark")  # Temporary
+    
+    parser.add_argument("--is_unit_test", action='store_true', 
+                        help="To run the Unit test executor")
 
     parser.add_argument("--verbose", action='store_true',
                         help="To print live logs")
@@ -115,7 +118,8 @@ pass@k: {args.pass_at_k}
         log_path=log_path,
         verbose=args.verbose,
         expansion_factor=args.expansion_factor,
-        is_leetcode=args.is_leetcode
+        is_leetcode=args.is_leetcode,
+        is_unit_test=args.is_unit_test
     )
 
     print(f"Done! Check out the logs in `{log_path}`")
