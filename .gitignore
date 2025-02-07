@@ -134,3 +134,4 @@ scratch/
 .vscode/
 
 .DS_Store/
+programming_runs/tests/*
