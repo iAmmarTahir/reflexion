@@ -35,8 +35,10 @@ def run_reflexion(
         while cur_pass < pass_at_k and not is_solved:
             if is_leetcode:
                 tests_i = item['visible_tests']
-            else:
+            elif is_unit_test:
                 tests_i = item["test_cases"] if "test_cases" in item else []
+            else:
+                tests_i = gen.internal_tests(item["prompt"], model, 1)
             # first attempt
             cur_func_impl = gen.func_impl(item["prompt"], model, "simple")
             implementations.append(cur_func_impl)
