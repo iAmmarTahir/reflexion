@@ -1,7 +1,7 @@
 python main.py \
-  --run_name "bigcodebench-valtest-regenerated-gpt-o3-mini-5-iters" \
+  --run_name "bigcodebench-valtest-80-gpt-o3-mini-5-iters" \
   --root_dir "root" \
-  --dataset_path ./benchmarks/valtest-regenerated/bigcodebench.jsonl \
+  --dataset_path ./benchmarks/valtest-variable/bigcodebench_80.jsonl \
   --strategy "reflexion" \
   --language "py" \
   --model "gpt-o3-mini" \

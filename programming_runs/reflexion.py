@@ -103,6 +103,7 @@ def run_reflexion(
         item["implementations"] = implementations
         item["test_feedback"] = test_feedback
         item["solution"] = cur_func_impl
+        item["task_id"] = item["name"]
         write_jsonl(log_path, [item], append=True)
 
         print_v(
