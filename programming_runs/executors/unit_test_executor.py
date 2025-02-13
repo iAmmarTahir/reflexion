@@ -15,7 +15,11 @@ class UnitTestExecutor(Executor):
         _id = str(uuid.uuid4())
         print("|| Begin Executing...")
 
-        imports = 'from typing import *'
+        imports = (
+            'import os\n'
+            'os.environ["MPLBACKEND"] = "Agg"\n'  # Force backend
+            'from typing import *\n'
+        )
         full_code = f'{imports}\n{func}\n' + "\n".join(tests)
         old_stdout = sys.stdout
         sys.stdout = StringIO()
